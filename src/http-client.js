@@ -18,6 +18,13 @@ const makeQueryString = q =>
         .join('&')}`
     : ''
 
+class RetryError extends Error {
+  constructor(message, waitTimeInS) {
+    super(message)
+    this.waitTimeInS = waitTimeInS
+  }
+}
+
 /**
  * Finalize API response
  */
@@ -47,6 +54,10 @@ const sendResult = call =>
         error = new Error(`${res.status} ${res.statusText} ${text}`)
         error.response = res
         error.responseText = text
+      }
+      if (res.status === 418 || res.status === 429) {
+        const retryAfter = res.headers.get('Retry-After')
+        throw new RetryError(error.message, Number(retryAfter))
       }
       throw error
     })
@@ -224,8 +235,8 @@ const book = (pubCall, payload, endpoint = '/api/v3/depth') =>
   checkParams('book', payload, ['symbol']) &&
   pubCall(endpoint, payload).then(({ lastUpdateId, asks, bids }) => ({
     lastUpdateId,
-    asks: asks.map(a => zip(['price', 'quantity'], a)),
-    bids: bids.map(b => zip(['price', 'quantity'], b)),
+    asks,
+    bids,
   }))
 
 const aggTrades = (pubCall, payload, endpoint = '/api/v3/aggTrades') =>

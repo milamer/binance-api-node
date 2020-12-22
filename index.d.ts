@@ -490,8 +490,8 @@ declare module 'binance-api-node' {
 
   export interface OrderBook {
     lastUpdateId: number
-    asks: Bid[]
-    bids: Bid[]
+    asks: [string, string][]
+    bids: [string, string][]
   }
 
   interface o {
