@@ -229,7 +229,7 @@ var ticker = function ticker(payload, cb) {
 };
 
 var allTickers = function allTickers(cb) {
-  var w = new _openWebsocket.default("".concat(BASE, "/!ticker@arr"));
+  var w = new _openWebsocket.default("".concat(BASE, "/!ticker@arr@3000"));
 
   w.onmessage = function (msg) {
     var arr = JSON.parse(msg.data);

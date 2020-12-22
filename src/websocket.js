@@ -157,7 +157,7 @@ const ticker = (payload, cb) => {
 }
 
 const allTickers = cb => {
-  const w = new openWebSocket(`${BASE}/!ticker@arr`)
+  const w = new openWebSocket(`${BASE}/!ticker@arr@3000`)
 
   w.onmessage = msg => {
     const arr = JSON.parse(msg.data)
@@ -279,7 +279,7 @@ const userTransforms = {
   }),
   // https://github.com/binance-exchange/binance-official-api-docs/blob/master/user-data-stream.md#account-update
   outboundAccountPosition: m => ({
-    balances: m.B.map(({a, f, l}) => ({asset: a, free: f, locked: l})),
+    balances: m.B.map(({ a, f, l }) => ({ asset: a, free: f, locked: l })),
     eventTime: m.E,
     eventType: 'outboundAccountPosition',
     lastAccountUpdate: m.u,
