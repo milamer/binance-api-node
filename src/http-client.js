@@ -25,7 +25,10 @@ const sendResult = call =>
   call.then(res => {
     // If response is ok, we can safely assume it is valid JSON
     if (res.ok) {
-      return res.json()
+      return res.json().then(json => ({
+        data: json,
+        weight: res.headers.has('X-MBX-USED-WEIGHT') ? res.headers.get('X-MBX-USED-WEIGHT') : '0',
+      }))
     }
 
     // Errors might come from the API itself or the proxy Binance is using.

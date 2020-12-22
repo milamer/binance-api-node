@@ -156,50 +156,63 @@ declare module 'binance-api-node' {
     }
   }
 
-  export type GetOrderOptions = {symbol: string, orderId: number} | {symbol: string, origClientOrderId: string}
+  export type GetOrderOptions =
+    | { symbol: string; orderId: number }
+    | { symbol: string; origClientOrderId: string }
+
+  type Result<T> = {
+    data: T
+    weight: string
+  }
 
   export interface Binance {
-    accountInfo(options?: { useServerTime: boolean }): Promise<Account>
-    tradeFee(): Promise<TradeFeeResult>
+    accountInfo(options?: { useServerTime: boolean }): Promise<Result<Account>>
+    tradeFee(): Promise<Result<TradeFeeResult>>
     aggTrades(options?: {
       symbol: string
       fromId?: string
       startTime?: number
       endTime?: number
       limit?: number
-    }): Promise<AggregatedTrade[]>
-    allBookTickers(): Promise<{ [key: string]: Ticker }>
-    book(options: { symbol: string; limit?: number }): Promise<OrderBook>
-    exchangeInfo(): Promise<ExchangeInfo>
-    order(options: NewOrder): Promise<Order>
-    orderTest(options: NewOrder): Promise<Order>
-    orderOco(options: NewOcoOrder): Promise<OcoOrder>
-    ping(): Promise<boolean>
-    prices(options?: {
-      symbol?: string
-    }): Promise<{ [index: string]: string }>
-    avgPrice(options?: { symbol: string }): Promise<AvgPriceResult | AvgPriceResult[]>
-    time(): Promise<number>
-    trades(options: { symbol: string; limit?: number }): Promise<TradeResult[]>
+    }): Promise<Result<AggregatedTrade[]>>
+    allBookTickers(): Promise<Result<{ [key: string]: Ticker }>>
+    book(options: { symbol: string; limit?: number }): Promise<Result<OrderBook>>
+    exchangeInfo(): Promise<Result<ExchangeInfo>>
+    order(options: NewOrder): Promise<Result<Order>>
+    orderTest(options: NewOrder): Promise<Result<Order>>
+    orderOco(options: NewOcoOrder): Promise<Result<OcoOrder>>
+    ping(): Promise<Result<boolean>>
+    prices(options?: { symbol?: string }): Promise<Result<{ [index: string]: string }>>
+    avgPrice(options?: { symbol: string }): Promise<Result<AvgPriceResult | AvgPriceResult[]>>
+    time(): Promise<Result<number>>
+    trades(options: { symbol: string; limit?: number }): Promise<Result<TradeResult[]>>
     ws: WebSocket
     myTrades(options: {
       symbol: string
       limit?: number
       fromId?: number
       useServerTime?: boolean
-    }): Promise<MyTrade[]>
-    getOrder(options: GetOrderOptions & {useServerTime?: boolean}): Promise<QueryOrderResult>
+    }): Promise<Result<MyTrade[]>>
+    getOrder(
+      options: GetOrderOptions & { useServerTime?: boolean },
+    ): Promise<Result<QueryOrderResult>>
     cancelOrder(options: {
       symbol: string
       orderId: number
       useServerTime?: boolean
-    }): Promise<CancelOrderResult>
+    }): Promise<Result<CancelOrderResult>>
     cancelOpenOrders(options: {
       symbol: string
       useServerTime?: boolean
-    }): Promise<CancelOrderResult[]>
-    openOrders(options: { symbol?: string; useServerTime?: boolean }): Promise<QueryOrderResult[]>
-    allOrders(options: { symbol?: string; useServerTime?: boolean }): Promise<QueryOrderResult[]>
+    }): Promise<Result<CancelOrderResult[]>>
+    openOrders(options: {
+      symbol?: string
+      useServerTime?: boolean
+    }): Promise<Result<QueryOrderResult[]>>
+    allOrders(options: {
+      symbol?: string
+      useServerTime?: boolean
+    }): Promise<Result<QueryOrderResult[]>>
     allOrdersOCO(options: {
       timestamp: number
       fromId?: number
@@ -207,88 +220,96 @@ declare module 'binance-api-node' {
       endTime?: number
       limit?: number
       recvWindow: number
-    }): Promise<QueryOrderResult[]>
-    dailyStats(options?: { symbol: string }): Promise<DailyStatsResult | DailyStatsResult[]>
-    candles(options: CandlesOptions): Promise<CandleChartResult[]>
+    }): Promise<Result<QueryOrderResult[]>>
+    dailyStats(options?: { symbol: string }): Promise<Result<DailyStatsResult | DailyStatsResult[]>>
+    candles(options: CandlesOptions): Promise<Result<CandleChartResult[]>>
     tradesHistory(options: {
       symbol: string
       limit?: number
       fromId?: number
-    }): Promise<TradeResult[]>
-    depositAddress(options: { asset: string }): Promise<DepositAddress>
+    }): Promise<Result<TradeResult[]>>
+    depositAddress(options: { asset: string }): Promise<Result<DepositAddress>>
     withdraw(options: {
       asset: string
       address: string
       amount: number
       name?: string
-    }): Promise<WithrawResponse>
-    assetDetail(): Promise<AssetDetail>
+    }): Promise<Result<WithrawResponse>>
+    assetDetail(): Promise<Result<AssetDetail>>
     withdrawHistory(options: {
       asset: string
       status?: number
       startTime?: number
       endTime?: number
-    }): Promise<WithdrawHistoryResponse>
+    }): Promise<Result<WithdrawHistoryResponse>>
     depositHistory(options: {
       asset: string
       status?: number
       startTime?: number
       endTime?: number
-    }): Promise<DepositHistoryResponse>
-    futuresPing(): Promise<boolean>
-    futuresTime(): Promise<number>
-    futuresExchangeInfo(): Promise<ExchangeInfo>
-    futuresBook(options: { symbol: string; limit?: number }): Promise<OrderBook>
-    futuresCandles(options: CandlesOptions): Promise<CandleChartResult[]>
+    }): Promise<Result<DepositHistoryResponse>>
+    futuresPing(): Promise<Result<boolean>>
+    futuresTime(): Promise<Result<number>>
+    futuresExchangeInfo(): Promise<Result<ExchangeInfo>>
+    futuresBook(options: { symbol: string; limit?: number }): Promise<Result<OrderBook>>
+    futuresCandles(options: CandlesOptions): Promise<Result<CandleChartResult[]>>
     futuresAggTrades(options?: {
       symbol: string
       fromId?: string
       startTime?: number
       endTime?: number
       limit?: number
-    }): Promise<AggregatedTrade[]>
-    futuresTrades(options: { symbol: string; limit?: number }): Promise<TradeResult[]>
-    futuresDailyStats(options?: { symbol: string }): Promise<DailyStatsResult | DailyStatsResult[]>
-    futuresPrices(): Promise<{ [index: string]: string }>
-    futuresAllBookTickers(): Promise<{ [key: string]: Ticker }>
-    futuresMarkPrice(): Promise<MarkPriceResult>
+    }): Promise<Result<AggregatedTrade[]>>
+    futuresTrades(options: { symbol: string; limit?: number }): Promise<Result<TradeResult[]>>
+    futuresDailyStats(options?: {
+      symbol: string
+    }): Promise<Result<DailyStatsResult | DailyStatsResult[]>>
+    futuresPrices(): Promise<Result<{ [index: string]: string }>>
+    futuresAllBookTickers(): Promise<Result<{ [key: string]: Ticker }>>
+    futuresMarkPrice(): Promise<Result<MarkPriceResult>>
     futuresAllForceOrders(options?: {
       symbol?: string
       startTime?: number
       endTime?: number
       limit?: number
-    }): Promise<AllForceOrdersResult[]>
+    }): Promise<Result<AllForceOrdersResult[]>>
     futuresFundingRate(options: {
       symbol: string
       startTime?: number
       endTime?: number
       limit?: number
-    }): Promise<FundingRateResult[]>
-    futuresOrder(options: NewOrder): Promise<Order>
+    }): Promise<Result<FundingRateResult[]>>
+    futuresOrder(options: NewOrder): Promise<Result<Order>>
     futuresCancelOrder(options: {
       symbol: string
       orderId: number
       useServerTime?: boolean
-    }): Promise<CancelOrderResult>
+    }): Promise<Result<CancelOrderResult>>
     futuresOpenOrders(options: {
       symbol?: string
       useServerTime?: boolean
-    }): Promise<QueryOrderResult>
-    futuresPositionRisk(options?: { recvWindow: number }): Promise<PositionRiskResult[]>
-    futuresAccountBalance(options?: { recvWindow: number }): Promise<FuturesBalanceResult[]>
-    futuresPositionMode(options?: { recvWindow: number }): Promise<PositionModeResult>
+    }): Promise<Result<QueryOrderResult>>
+    futuresPositionRisk(options?: { recvWindow: number }): Promise<Result<PositionRiskResult[]>>
+    futuresAccountBalance(options?: { recvWindow: number }): Promise<Result<FuturesBalanceResult[]>>
+    futuresPositionMode(options?: { recvWindow: number }): Promise<Result<PositionModeResult>>
     futuresPositionModeChange(options: {
       dualSidePosition: string
       recvWindow: number
-    }): Promise<ChangePositionModeResult>
-    marginOrder(options: NewOrder): Promise<Order>
-    marginAllOrders(options: { symbol: string, useServerTime?: boolean }): Promise<QueryOrderResult[]>
+    }): Promise<Result<ChangePositionModeResult>>
+    marginOrder(options: NewOrder): Promise<Result<Order>>
+    marginAllOrders(options: {
+      symbol: string
+      useServerTime?: boolean
+    }): Promise<Result<QueryOrderResult[]>>
     marginCancelOrder(options: {
       symbol: string
       orderId?: number
       useServerTime?: boolean
-    }): Promise<CancelOrderResult>
-    marginOpenOrders(options: { symbol?: string; useServerTime?: boolean }): Promise<QueryOrderResult[]>
+    }): Promise<Result<CancelOrderResult>>
+    marginOpenOrders(options: {
+      symbol?: string
+      useServerTime?: boolean
+    }): Promise<Result<QueryOrderResult[]>>
   }
 
   export interface HttpError extends Error {
@@ -296,7 +317,11 @@ declare module 'binance-api-node' {
     url: string
   }
 
-  export type UserDataStreamEvent = OutboundAccountInfo | ExecutionReport | BalanceUpdate | OutboundAccountPosition
+  export type UserDataStreamEvent =
+    | OutboundAccountInfo
+    | ExecutionReport
+    | BalanceUpdate
+    | OutboundAccountPosition
 
   export interface WebSocket {
     depth: (
@@ -326,14 +351,18 @@ declare module 'binance-api-node' {
       callback: (trade: Trade) => void,
     ) => ReconnectingWebSocketHandler
     user: (callback: (msg: UserDataStreamEvent) => void) => Promise<ReconnectingWebSocketHandler>
-    marginUser: (callback: (msg: OutboundAccountInfo | ExecutionReport) => void) => Promise<ReconnectingWebSocketHandler>
-    futuresUser: (callback: (msg: OutboundAccountInfo | ExecutionReport) => void) => Promise<ReconnectingWebSocketHandler>
+    marginUser: (
+      callback: (msg: OutboundAccountInfo | ExecutionReport) => void,
+    ) => Promise<ReconnectingWebSocketHandler>
+    futuresUser: (
+      callback: (msg: OutboundAccountInfo | ExecutionReport) => void,
+    ) => Promise<ReconnectingWebSocketHandler>
   }
 
   export type WebSocketCloseOptions = {
-    delay: number;
-    fastClose: boolean;
-    keepClosed: boolean;
+    delay: number
+    fastClose: boolean
+    keepClosed: boolean
   }
 
   export type ReconnectingWebSocketHandler = (options?: WebSocketCloseOptions) => void
@@ -465,23 +494,53 @@ declare module 'binance-api-node' {
     bids: Bid[]
   }
 
-  export interface NewOrder {
-    icebergQty?: string
-    newClientOrderId?: string
-    price?: string
-    quantity: string
-    recvWindow?: number
-    side: OrderSide
-    stopPrice?: string
+  interface o {
     symbol: string
-    timeInForce?: TimeInForce
-    useServerTime?: boolean
+    side: OrderSide
     type: OrderType
-    newOrderRespType?: NewOrderRespType
-    isIsolated?: boolean
+    timeInForce?: TimeInForce
+    quantity?: string
     quoteOrderQty?: string
-    sideEffectType?: SideEffectType
+    price?: string
+    newClientOrderId?: string
+    newOrderRespType?: NewOrderRespType
+    recvWindow?: number
+    useServerTime?: boolean
   }
+
+  interface LimitOrder extends o {
+    type: 'LIMIT'
+    quantity: string
+    icebergQty?: string
+    timeInForce: TimeInForce
+  }
+
+  interface MarketOrder1 extends o {
+    quantity: string
+  }
+  interface MarketOrder2 extends o {
+    quoteOrderQty: string
+  }
+
+  export type NewOrder = LimitOrder | MarketOrder1 | MarketOrder2
+
+  // export interface NewOrder {
+  //   icebergQty?: string
+  //   newClientOrderId?: string
+  //   price?: string
+  //   quantity: string
+  //   recvWindow?: number
+  //   side: OrderSide
+  //   stopPrice?: string
+  //   symbol: string
+  //   timeInForce?: TimeInForce
+  //   useServerTime?: boolean
+  //   type: OrderType
+  //   newOrderRespType?: NewOrderRespType
+  //   isIsolated?: boolean
+  //   quoteOrderQty?: string
+  //   sideEffectType?: SideEffectType
+  // }
 
   export interface NewOcoOrder {
     symbol: string
@@ -501,10 +560,7 @@ declare module 'binance-api-node' {
     useServerTime?: boolean
   }
 
-  export type SideEffectType =
-    | 'NO_SIDE_EFFECT'
-    | 'MARGIN_BUY'
-    | 'AUTO_REPAY'
+  export type SideEffectType = 'NO_SIDE_EFFECT' | 'MARGIN_BUY' | 'AUTO_REPAY'
 
   export interface OrderFill {
     price: string
