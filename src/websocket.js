@@ -157,7 +157,7 @@ const ticker = (payload, cb) => {
 }
 
 const allTickers = cb => {
-  const w = new openWebSocket(`${BASE}/!ticker@arr@3000`)
+  const w = new openWebSocket(`${BASE}/!ticker@arr@3000ms`)
 
   w.onmessage = msg => {
     const arr = JSON.parse(msg.data)
