@@ -18,13 +18,6 @@ const makeQueryString = q =>
         .join('&')}`
     : ''
 
-class RetryError extends Error {
-  constructor(message, waitTimeInS) {
-    super(message)
-    this.waitTimeInS = waitTimeInS
-  }
-}
-
 /**
  * Finalize API response
  */
@@ -34,7 +27,7 @@ const sendResult = call =>
     if (res.ok) {
       return res.json().then(json => ({
         data: json,
-        weight: res.headers.has('X-MBX-USED-WEIGHT') ? res.headers.get('X-MBX-USED-WEIGHT') : '0',
+        weight: res.headers.has('X-MBX-USED-WEIGHT') ? res.headers.get('X-MBX-USED-WEIGHT') : null,
       }))
     }
 
@@ -48,16 +41,14 @@ const sendResult = call =>
         // The body was JSON parseable, assume it is an API response error
         error = new Error(json.msg || `${res.status} ${res.statusText}`)
         error.code = json.code
-        error.url = res.url
       } catch (e) {
         // The body was not JSON parseable, assume it is proxy error
         error = new Error(`${res.status} ${res.statusText} ${text}`)
-        error.response = res
-        error.responseText = text
       }
+      error.response = res
       if (res.status === 418 || res.status === 429) {
         const retryAfter = res.headers.get('Retry-After')
-        throw new RetryError(error.message, Number(retryAfter))
+        error.waitTimeInS = Number(retryAfter)
       }
       throw error
     })
@@ -142,7 +133,7 @@ const privateCall = ({ apiKey, apiSecret, endpoints, getTime = defaultGetTime, p
   }
 
   return (data && data.useServerTime
-    ? pubCall('/api/v3/time').then(r => r.serverTime)
+    ? pubCall('/api/v3/time').then(r => r.data.serverTime)
     : Promise.resolve(getTime())
   ).then(timestamp => {
     if (data) {
@@ -191,9 +182,10 @@ export const candleFields = [
  */
 const candles = (pubCall, payload, endpoint = '/api/v3/klines') =>
   checkParams('candles', payload, ['symbol']) &&
-  pubCall(endpoint, { interval: '5m', ...payload }).then(candles =>
-    candles.map(candle => zip(candleFields, candle)),
-  )
+  pubCall(endpoint, { interval: '5m', ...payload }).then(result => ({
+    ...result,
+    data: result.data.map(candle => zip(candleFields, candle)),
+  }))
 
 /**
  * Create a new order wrapper for market order simplicity
@@ -232,17 +224,13 @@ const orderOco = (privCall, payload = {}, url) => {
  * Zip asks and bids reponse from order book
  */
 const book = (pubCall, payload, endpoint = '/api/v3/depth') =>
-  checkParams('book', payload, ['symbol']) &&
-  pubCall(endpoint, payload).then(({ lastUpdateId, asks, bids }) => ({
-    lastUpdateId,
-    asks,
-    bids,
-  }))
+  checkParams('book', payload, ['symbol']) && pubCall(endpoint, payload)
 
 const aggTrades = (pubCall, payload, endpoint = '/api/v3/aggTrades') =>
   checkParams('aggTrades', payload, ['symbol']) &&
-  pubCall(endpoint, payload).then(trades =>
-    trades.map(trade => ({
+  pubCall(endpoint, payload).then(result => ({
+    ...result,
+    data: result.data.map(trade => ({
       aggId: trade.a,
       symbol: payload.symbol,
       price: trade.p,
@@ -253,7 +241,7 @@ const aggTrades = (pubCall, payload, endpoint = '/api/v3/aggTrades') =>
       isBuyerMaker: trade.m,
       wasBestPrice: trade.M,
     })),
-  )
+  }))
 
 export default opts => {
   const endpoints = {
@@ -266,8 +254,9 @@ export default opts => {
   const kCall = keyCall({ ...opts, pubCall })
 
   return {
-    ping: () => pubCall('/api/v3/ping').then(() => true),
-    time: () => pubCall('/api/v3/time').then(r => r.serverTime),
+    ping: () => pubCall('/api/v3/ping').then(result => ({ ...result, data: true })),
+    time: () =>
+      pubCall('/api/v3/time').then(result => ({ ...result, data: result.data.serverTime })),
     exchangeInfo: () => pubCall('/api/v3/exchangeInfo'),
 
     book: payload => book(pubCall, payload),
@@ -282,16 +271,21 @@ export default opts => {
 
     dailyStats: payload => pubCall('/api/v3/ticker/24hr', payload),
     prices: payload =>
-      pubCall('/api/v3/ticker/price', payload).then(r =>
-        (Array.isArray(r) ? r : [r]).reduce((out, cur) => ((out[cur.symbol] = cur.price), out), {}),
-      ),
+      pubCall('/api/v3/ticker/price', payload).then(({ data: r, ...rest }) => ({
+        ...rest,
+        data: (Array.isArray(r) ? r : [r]).reduce(
+          (out, cur) => ((out[cur.symbol] = cur.price), out),
+          {},
+        ),
+      })),
 
     avgPrice: payload => pubCall('/api/v3/avgPrice', payload),
 
     allBookTickers: () =>
-      pubCall('/api/v3/ticker/bookTicker').then(r =>
-        (Array.isArray(r) ? r : [r]).reduce((out, cur) => ((out[cur.symbol] = cur), out), {}),
-      ),
+      pubCall('/api/v3/ticker/bookTicker').then(({ data: r, ...rest }) => ({
+        ...rest,
+        data: (Array.isArray(r) ? r : [r]).reduce((out, cur) => ((out[cur.symbol] = cur), out), {}),
+      })),
 
     /**
      * Call unmanaged private call to Binance api; you need a key and secret

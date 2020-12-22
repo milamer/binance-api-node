@@ -162,7 +162,7 @@ declare module 'binance-api-node' {
 
   type Result<T> = {
     data: T
-    weight: string
+    weight: string | null
   }
 
   export interface Binance {

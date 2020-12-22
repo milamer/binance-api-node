@@ -13,33 +13,15 @@ require("isomorphic-fetch");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-function _construct(Parent, args, Class) { if (isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
-
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 var BASE = 'https://api.binance.com';
 var FUTURES = 'https://fapi.binance.com';
@@ -57,24 +39,6 @@ var makeQueryString = function makeQueryString(q) {
     return "".concat(encodeURIComponent(k), "=").concat(encodeURIComponent(q[k]));
   }).join('&')) : '';
 };
-
-var RetryError =
-/*#__PURE__*/
-function (_Error) {
-  _inherits(RetryError, _Error);
-
-  function RetryError(message, waitTimeInS) {
-    var _this;
-
-    _classCallCheck(this, RetryError);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(RetryError).call(this, message));
-    _this.waitTimeInS = waitTimeInS;
-    return _this;
-  }
-
-  return RetryError;
-}(_wrapNativeSuper(Error));
 /**
  * Finalize API response
  */
@@ -87,7 +51,7 @@ var sendResult = function sendResult(call) {
       return res.json().then(function (json) {
         return {
           data: json,
-          weight: res.headers.has('X-MBX-USED-WEIGHT') ? res.headers.get('X-MBX-USED-WEIGHT') : '0'
+          weight: res.headers.has('X-MBX-USED-WEIGHT') ? res.headers.get('X-MBX-USED-WEIGHT') : null
         };
       });
     } // Errors might come from the API itself or the proxy Binance is using.
@@ -103,17 +67,16 @@ var sendResult = function sendResult(call) {
 
         error = new Error(json.msg || "".concat(res.status, " ").concat(res.statusText));
         error.code = json.code;
-        error.url = res.url;
       } catch (e) {
         // The body was not JSON parseable, assume it is proxy error
         error = new Error("".concat(res.status, " ").concat(res.statusText, " ").concat(text));
-        error.response = res;
-        error.responseText = text;
       }
+
+      error.response = res;
 
       if (res.status === 418 || res.status === 429) {
         var retryAfter = res.headers.get('Retry-After');
-        throw new RetryError(error.message, Number(retryAfter));
+        error.waitTimeInS = Number(retryAfter);
       }
 
       throw error;
@@ -216,7 +179,7 @@ var privateCall = function privateCall(_ref3) {
     }
 
     return (data && data.useServerTime ? pubCall('/api/v3/time').then(function (r) {
-      return r.serverTime;
+      return r.data.serverTime;
     }) : Promise.resolve(getTime())).then(function (timestamp) {
       if (data) {
         delete data.useServerTime;
@@ -253,9 +216,11 @@ var _candles = function candles(pubCall, payload) {
   var endpoint = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '/api/v3/klines';
   return checkParams('candles', payload, ['symbol']) && pubCall(endpoint, _objectSpread({
     interval: '5m'
-  }, payload)).then(function (candles) {
-    return candles.map(function (candle) {
-      return (0, _lodash.default)(candleFields, candle);
+  }, payload)).then(function (result) {
+    return _objectSpread({}, result, {
+      data: result.data.map(function (candle) {
+        return (0, _lodash.default)(candleFields, candle);
+      })
     });
   });
 };
@@ -296,33 +261,26 @@ var _orderOco = function orderOco(privCall) {
 
 var _book = function book(pubCall, payload) {
   var endpoint = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '/api/v3/depth';
-  return checkParams('book', payload, ['symbol']) && pubCall(endpoint, payload).then(function (_ref4) {
-    var lastUpdateId = _ref4.lastUpdateId,
-        asks = _ref4.asks,
-        bids = _ref4.bids;
-    return {
-      lastUpdateId: lastUpdateId,
-      asks: asks,
-      bids: bids
-    };
-  });
+  return checkParams('book', payload, ['symbol']) && pubCall(endpoint, payload);
 };
 
 var _aggTrades = function aggTrades(pubCall, payload) {
   var endpoint = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '/api/v3/aggTrades';
-  return checkParams('aggTrades', payload, ['symbol']) && pubCall(endpoint, payload).then(function (trades) {
-    return trades.map(function (trade) {
-      return {
-        aggId: trade.a,
-        symbol: payload.symbol,
-        price: trade.p,
-        quantity: trade.q,
-        firstId: trade.f,
-        lastId: trade.l,
-        timestamp: trade.T,
-        isBuyerMaker: trade.m,
-        wasBestPrice: trade.M
-      };
+  return checkParams('aggTrades', payload, ['symbol']) && pubCall(endpoint, payload).then(function (result) {
+    return _objectSpread({}, result, {
+      data: result.data.map(function (trade) {
+        return {
+          aggId: trade.a,
+          symbol: payload.symbol,
+          price: trade.p,
+          quantity: trade.q,
+          firstId: trade.f,
+          lastId: trade.l,
+          timestamp: trade.T,
+          isBuyerMaker: trade.m,
+          wasBestPrice: trade.M
+        };
+      })
     });
   });
 };
@@ -344,13 +302,17 @@ var _default = function _default(opts) {
   }));
   return {
     ping: function ping() {
-      return pubCall('/api/v3/ping').then(function () {
-        return true;
+      return pubCall('/api/v3/ping').then(function (result) {
+        return _objectSpread({}, result, {
+          data: true
+        });
       });
     },
     time: function time() {
-      return pubCall('/api/v3/time').then(function (r) {
-        return r.serverTime;
+      return pubCall('/api/v3/time').then(function (result) {
+        return _objectSpread({}, result, {
+          data: result.data.serverTime
+        });
       });
     },
     exchangeInfo: function exchangeInfo() {
@@ -375,20 +337,30 @@ var _default = function _default(opts) {
       return pubCall('/api/v3/ticker/24hr', payload);
     },
     prices: function prices(payload) {
-      return pubCall('/api/v3/ticker/price', payload).then(function (r) {
-        return (Array.isArray(r) ? r : [r]).reduce(function (out, cur) {
-          return out[cur.symbol] = cur.price, out;
-        }, {});
+      return pubCall('/api/v3/ticker/price', payload).then(function (_ref4) {
+        var r = _ref4.data,
+            rest = _objectWithoutProperties(_ref4, ["data"]);
+
+        return _objectSpread({}, rest, {
+          data: (Array.isArray(r) ? r : [r]).reduce(function (out, cur) {
+            return out[cur.symbol] = cur.price, out;
+          }, {})
+        });
       });
     },
     avgPrice: function avgPrice(payload) {
       return pubCall('/api/v3/avgPrice', payload);
     },
     allBookTickers: function allBookTickers() {
-      return pubCall('/api/v3/ticker/bookTicker').then(function (r) {
-        return (Array.isArray(r) ? r : [r]).reduce(function (out, cur) {
-          return out[cur.symbol] = cur, out;
-        }, {});
+      return pubCall('/api/v3/ticker/bookTicker').then(function (_ref5) {
+        var r = _ref5.data,
+            rest = _objectWithoutProperties(_ref5, ["data"]);
+
+        return _objectSpread({}, rest, {
+          data: (Array.isArray(r) ? r : [r]).reduce(function (out, cur) {
+            return out[cur.symbol] = cur, out;
+          }, {})
+        });
       });
     },
 
